@@ -14,9 +14,11 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-app.get("/urls.json", (req, res) => {
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase}
+  res.render('urls_index', templateVars)
   // JSON.parse(urlDatabase)
-  res.send(urlDatabase);
+  // res.send(urlDatabase);
 });
 
 app.get("/hello", (req, res) => {
@@ -26,3 +28,4 @@ app.get("/hello", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
