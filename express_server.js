@@ -59,6 +59,17 @@ app.get("/u/:id", (req, res) => {
   
 });
 
+app.post('/urls/:id/delete', (req, res) => {
+  // console.log(req.params.id);
+  for (const id in urlDatabase) {
+    if(id === req.params.id) {
+      delete urlDatabase[id]
+    }
+  }
+
+  res.redirect('/urls')
+})
+
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
