@@ -37,7 +37,8 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   const shortUrl = generateRandomString(req.body.longURL)
   urlDatabase[shortUrl] = req.body.longURL
-  res.redirect(`/urls/${shortUrl}`)
+  res.redirect('/urls')
+  //res.redirect(`/urls/${shortUrl}`)
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -59,8 +60,17 @@ app.get("/u/:id", (req, res) => {
   
 });
 
+//route updates url
+app.post('/urls/:id', (req, res) => {
+  const updatedURL = req.body.url
+  const id = req.params.id 
+  urlDatabase[id] = updatedURL
+  
+  res.redirect('/urls')
+})
+
+//rout handling for deleting an specific url
 app.post('/urls/:id/delete', (req, res) => {
-  // console.log(req.params.id);
   for (const id in urlDatabase) {
     if(id === req.params.id) {
       delete urlDatabase[id]
