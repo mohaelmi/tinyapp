@@ -37,7 +37,7 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   const shortUrl = generateRandomString(req.body.longURL)
   urlDatabase[shortUrl] = req.body.longURL
-  res.redirect('/urls')
+  res.redirect(`/urls/${shortUrl}`)
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -45,8 +45,22 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:id", (req, res) => {
+  for (const id in urlDatabase) {
+    console.log(id, req.params.id);
+    if(id === req.params.id) {
+      const longURL = urlDatabase[req.params.id]
+      res.redirect(longURL);
+      return;
+    }
+  }
+
+  res.send('404 Page Not Found')
+  
+});
+
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`App listening on port ${PORT}`);
 });
 
