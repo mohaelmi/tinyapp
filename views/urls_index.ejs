@@ -17,7 +17,7 @@
       <title>TinyApp</title>
     </head>
     <body>
-    <%- include('partials/_header.ejs') %>
+    <%- include('partials/_header.ejs', {username: username}) %>
     <main style="margin: 1em;">
       <h3>My URLs</h3>
       <table class="table">
@@ -45,6 +45,7 @@
             </tr>
             <% } %>
           </tbody>
+          <!-- <p> <%=username%> </p> -->
         </table>
     </main>
     <!-- Bootstrap JS -->
