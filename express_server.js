@@ -41,7 +41,6 @@ app.post("/urls/new", (req, res) => {
   const shortUrl = generateRandomString();
   urlDatabase[shortUrl] = req.body.longURL;
   res.redirect('/urls');
-  //res.redirect(`/urls/${shortUrl}`)
 });
 
 //handling request the edit page (url_show)
