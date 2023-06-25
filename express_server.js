@@ -1,7 +1,7 @@
 const express = require("express");
-const cookieParser = require("cookie-parser")
+const cookieParser = require("cookie-parser");
 const app = express();
-const PORT = 3001; // port number
+const PORT = 3000; // port number
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -12,89 +12,87 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const generateRandomString = (longURL) => {
-  let shortUrl = ''
-  let str = 'gsD5d37g1t'
-  // console.log(longURL.le);
+const generateRandomString = () => {
+  let shortUrl = '';
+  let str = 'gsD5d37g1t';
   for (let i = 6; i > 0; i--) {
-    shortUrl  += str[Math.floor(Math.random() * str.length)]
+    shortUrl  += str[Math.floor(Math.random() * str.length)];
   }
-  return shortUrl
-}
+  return shortUrl;
+};
 
+//route for showing urls_index page
 app.get("/urls", (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     urls: urlDatabase,
     username: req.cookies['username']
-  }
-  res.render('urls_index', templateVars)
+  };
+  res.render('urls_index', templateVars);
 });
 
+//route for handling for rendering urls_new page
 app.get("/urls/new", (req, res) => {
-  const templateVars = {  username: req.cookies['username'] }
+  const templateVars = {  username: req.cookies['username'] };
   res.render('urls_new', templateVars);
 });
 
-app.post("/urls", (req, res) => {
-  const shortUrl = generateRandomString(req.body.longURL)
-  urlDatabase[shortUrl] = req.body.longURL
-  res.redirect('/urls')
+//route for handling new URL
+app.post("/urls/new", (req, res) => {
+  const shortUrl = generateRandomString();
+  urlDatabase[shortUrl] = req.body.longURL;
+  res.redirect('/urls');
   //res.redirect(`/urls/${shortUrl}`)
 });
 
+//handling request the edit page (url_show)
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { 
-    id: req.params.id, 
+  const templateVars = {
+    id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies['username'] 
+    username: req.cookies['username']
   };
   res.render("urls_show", templateVars);
 });
 
+//route for redirecting shortURL to its own website/realURL
 app.get("/u/:id", (req, res) => {
-  for (const id in urlDatabase) {
-    console.log(id, req.params.id);
-    if(id === req.params.id) {
-      const longURL = urlDatabase[req.params.id]
-      res.redirect(longURL);
-      return;
-    }
-  }
+  if (!urlDatabase[req.params.id]) res.send('404 Page Not Found');
 
-  res.send('404 Page Not Found')
-  
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
+    
 });
 
 //route updates url
 app.post('/urls/:id', (req, res) => {
-  const updatedURL = req.body.url
-  const id = req.params.id 
-  urlDatabase[id] = updatedURL
+  const updatedURL = req.body.url;
+  const id = req.params.id;
+  urlDatabase[id] = updatedURL;
   
-  res.redirect('/urls')
-})
+  res.redirect('/urls');
+});
 
 //rout handling for deleting an specific url
 app.post('/urls/:id/delete', (req, res) => {
-  for (const id in urlDatabase) {
-    if(id === req.params.id) {
-      delete urlDatabase[id]
-    }
-  }
+  delete urlDatabase[req.params.id];
+  res.redirect('/urls');
+});
 
-  res.redirect('/urls')
-})
-
+//route for set a cookie from the form
 app.post('/login', (req, res) => {
-  // setCookies(req.body.username)
-  res.cookie('username', req.body.username)
-  res.redirect('/urls')
-  // const username = cookieParser.JSONCookies(req.body.username)
+  res.cookie('username', req.body.username);
+  res.redirect('/urls');
+});
 
-  
-})
+//clear the cookie and redirect when request post at /logout
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+});
 
 
+
+//server listening at specific port
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
 });
