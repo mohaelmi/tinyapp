@@ -21,6 +21,10 @@ const generateRandomString = () => {
   return shortUrl;
 };
 
+app.get('/', (req, res) => {
+  res.redirect('/urls')
+})
+
 //route for showing urls_index page
 app.get("/urls", (req, res) => {
   const templateVars = {
