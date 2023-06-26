@@ -90,6 +90,9 @@ app.post('/logout', (req, res) => {
 });
 
 
+app.get('/register', (req, res) => {
+  res.render('registration')
+})
 
 //server listening at specific port
 app.listen(PORT, () => {
