@@ -1,4 +1,5 @@
 const express = require("express");
+const uid = require("uid");
 const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 3000; // port number
@@ -12,6 +13,10 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  dt1tg: { id: 'dt1tg', email: 'moha@12', password: '1' }
+}
+
 const generateRandomString = () => {
   let shortUrl = '';
   let str = 'gsD5d37g1t';
@@ -21,18 +26,30 @@ const generateRandomString = () => {
   return shortUrl;
 };
 
+const getUserByEmail = (email) => {
+  for (const user in users) {
+    if(users[user].email === email){
+      return user
+    }
+  }
+
+  return null
+}
+
 //route for showing urls_index page
 app.get("/urls", (req, res) => {
+  // console.log();
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies['username']
+    user: users[req.cookies.user_id],
+    // username: req.cookies['username']
   };
   res.render('urls_index', templateVars);
 });
 
 //route for handling for rendering urls_new page
 app.get("/urls/new", (req, res) => {
-  const templateVars = {  username: req.cookies['username'] };
+  const templateVars = {   user: users[req.cookies.user_id] };
   res.render('urls_new', templateVars);
 });
 
@@ -48,7 +65,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies['username']
+    user: users[req.cookies.user_id],
   };
   res.render("urls_show", templateVars);
 });
@@ -92,6 +109,34 @@ app.post('/logout', (req, res) => {
 
 app.get('/register', (req, res) => {
   res.render('registration')
+})
+
+app.get('/login', (req, res) => {
+  res.render('login')
+})
+
+
+app.post('/register', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password
+  const userExists = getUserByEmail(email)
+  if(!email || !password) {
+    res.status(400)
+    res.send('please provide full information!')
+  }else if (userExists) {
+    res.status(400)
+    res.send('email already exists')
+  } else { 
+    const user = { 
+      id: generateRandomString(),
+      email,
+      password 
+    }
+    users[user.id] = user
+    res.cookie('user_id', user.id);
+    res.redirect('urls')
+  }
+  
 })
 
 //server listening at specific port
