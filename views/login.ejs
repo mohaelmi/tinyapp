@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -8,40 +14,29 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-    <title>URL - TinyApp Example</title>
+
+    <title>New URL - TinyApp Example</title>
   </head>
 
   <body>
-    <%- include('partials/_header', {user: user}) %>
-    <div class="card text-center">
-      <div class="card-header"></div>
-      <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-        <p class="card-text">
-          Short URL ID: <a href="<%= longURL %>"><%= id %></a>
-        </p>
-      </div>
-      <di>
-        <h3>Update URL</h3>
-        <div class="d-flex justify-content-center">
+    <main style="margin: 6em">
 
-        <form class="form-inline" method="POST" action="/urls/<%=id%>">
-          <div class="form-group mb-2"> 
-            <label for="url">Update URL:</label>
-            <input 
-            class="form-control"
-            type="text"
-            name="url"
-            style="width: 300px; margin: 1em"
-            value="<%=longURL %>"
-            />
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
-        </form>
+    <h3>Log in</h3>
+     
+    <form class="form-inline" action="/login" method="POST">
+      <div class="form-group" >
+        <label for="email">Enter Email:</label>
+        <input class="form-control" type="email" name="email" placeholder="Email"
+          style="width: 200px; margin: 1em"
+        /><br>
+        <label for="password">Enter Password:</label>
+        <input class="form-control" type="password" name="password" placeholder="Password"
+          style="width: 200px; margin: 1em"
+        />
+          <button type="submit" class="btn btn-outline-info">Login</button>
       </div>
-      </di>
-      <div class="card-footer text-muted"></div>
-    </div>
+    </form>
+    </main>
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -60,3 +55,6 @@
     ></script>
   </body>
 </html>
+
+
+
