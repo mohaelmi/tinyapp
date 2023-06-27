@@ -27,10 +27,15 @@ const generateRandomString = () => {
 };
 
 const getUserByEmail = (email) => {
-  for (const user in users) {
-    if(users[user].email === email){
-      return user
+  let user;
+  for (const userId in users) {
+    if(users[userId].email === email){
+      user = users[userId]
     }
+  }
+
+  if(user) {
+    return user
   }
 
   return null
@@ -42,7 +47,6 @@ app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
     user: users[req.cookies.user_id],
-    // username: req.cookies['username']
   };
   res.render('urls_index', templateVars);
 });
@@ -94,16 +98,12 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
-//route for set a cookie from the form
-app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
-});
+
 
 //clear the cookie and redirect when request post at /logout
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
-  res.redirect('/urls');
+  res.clearCookie('user_id');
+  res.redirect('/login');
 });
 
 
@@ -116,28 +116,52 @@ app.get('/login', (req, res) => {
 })
 
 
+//login
+app.post('/login', (req, res) => {
+  const email = req.body.email
+  const password = req.body.password
+  const user = getUserByEmail(email)
+
+   if(!user) {
+    res.status(403).send('user does not exist or incorrect email')
+    return;
+  }
+
+  if(user.password !== password) {
+    res.status(403).send('Incorrect password')
+    return;
+  }
+
+  res.cookie('user_id', user.id);
+  res.redirect('/urls');
+});
+
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password
   const userExists = getUserByEmail(email)
   if(!email || !password) {
-    res.status(400)
-    res.send('please provide full information!')
-  }else if (userExists) {
-    res.status(400)
-    res.send('email already exists')
-  } else { 
-    const user = { 
-      id: generateRandomString(),
-      email,
-      password 
-    }
-    users[user.id] = user
-    res.cookie('user_id', user.id);
-    res.redirect('urls')
+    res.status(400).send('please provide full information!')
+    return;
   }
   
+  if (userExists) {
+    res.status(400).send('email already exists')
+    return;
+  }
+   
+  const user = { 
+    id: generateRandomString(),
+    email,
+    password 
+  }
+    users[user.id] = user
+    res.cookie('user_id', user.id);
+    res.redirect('/urls')
+  
 })
+
+
 
 //server listening at specific port
 app.listen(PORT, () => {
