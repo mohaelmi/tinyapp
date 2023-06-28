@@ -57,12 +57,22 @@ app.get("/urls", (req, res) => {
 
 //route for handling for rendering urls_new page
 app.get("/urls/new", (req, res) => {
+  const user_id = req.cookies.user_id
+  if(!user_id) {
+    res.redirect('/login')
+    return;
+  }
   const templateVars = {   user: users[req.cookies.user_id] };
   res.render('urls_new', templateVars);
 });
 
-//route for handling new URL
+//route for handling new URL and shortenning
 app.post("/urls/new", (req, res) => {
+  const user_id = req.cookies.user_id
+  if(!user_id) {
+   res.send("<h4> You haven't sign in yet. please sign in first!</h4> <br> <a href = '/login'> sign in </a>")
+   return;
+  }
   const shortUrl = generateRandomString();
   urlDatabase[shortUrl] = req.body.longURL;
   res.redirect('/urls');
@@ -70,6 +80,7 @@ app.post("/urls/new", (req, res) => {
 
 //handling request the edit page (url_show)
 app.get("/urls/:id", (req, res) => {
+ 
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
@@ -80,7 +91,10 @@ app.get("/urls/:id", (req, res) => {
 
 //route for redirecting shortURL to its own website/realURL
 app.get("/u/:id", (req, res) => {
-  if (!urlDatabase[req.params.id]) res.send('404 Page Not Found');
+  if (!urlDatabase[req.params.id]) {
+    res.send('<h2>The short URL is not exist </h2>');
+    return;
+  }
 
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
@@ -112,10 +126,22 @@ app.post('/logout', (req, res) => {
 
 
 app.get('/register', (req, res) => {
+  const user_id = req.cookies.user_id
+  console.log(user_id);
+  if(user_id) {
+    res.redirect('/urls')
+    return;
+  }
+
   res.render('registration')
 })
 
 app.get('/login', (req, res) => {
+  const user_id = req.cookies.user_id
+  if(user_id) {
+    res.redirect('/urls')
+    return;
+  }
   res.render('login')
 })
 
