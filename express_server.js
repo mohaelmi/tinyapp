@@ -9,12 +9,24 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "d2ateg"
+  }, 
+  "9sm5xK": { 
+    longURL: "http://www.google.com",
+    userID: "dt1tg"
+  }
 };
 
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
 const users = {
-  dt1tg: { id: 'dt1tg', email: 'moha@12', password: '1' }
+  dt1tg: { id: 'dt1tg', email: 'moha@12', password: '1' },
+  d2ateg: { id: 'd2ateg', email: 'moha@1', password: '2' }
 }
 
 const generateRandomString = () => {
@@ -25,6 +37,17 @@ const generateRandomString = () => {
   }
   return shortUrl;
 };
+
+const urlsForUser = (id) => {
+  const urls = {}
+  for (const urlId in urlDatabase) {
+    if(urlDatabase[urlId].userID === id) {
+      urls[urlId]  = urlDatabase[urlId].longURL
+    }
+   }
+
+   return urls? urls : null
+}
 
 app.get('/', (req, res) => {
   res.redirect('/urls')
@@ -47,9 +70,17 @@ const getUserByEmail = (email) => {
 
 //route for showing urls_index page
 app.get("/urls", (req, res) => {
-  // console.log();
+  const user_id = req.cookies.user_id
+  if(!user_id) {
+    res.send("<h4> You haven't sign in yet. please login first!</h4> <br> <a href = '/login'> sign in </a>")
+    return;
+  }
+
+  const urls =  urlsForUser(user_id)
+ 
+  
   const templateVars = {
-    urls: urlDatabase,
+    urls: urls,
     user: users[req.cookies.user_id],
   };
   res.render('urls_index', templateVars);
@@ -62,7 +93,7 @@ app.get("/urls/new", (req, res) => {
     res.redirect('/login')
     return;
   }
-  const templateVars = {   user: users[req.cookies.user_id] };
+  const templateVars = {   user: users[user_id] };
   res.render('urls_new', templateVars);
 });
 
@@ -73,17 +104,31 @@ app.post("/urls/new", (req, res) => {
    res.send("<h4> You haven't sign in yet. please sign in first!</h4> <br> <a href = '/login'> sign in </a>")
    return;
   }
-  const shortUrl = generateRandomString();
-  urlDatabase[shortUrl] = req.body.longURL;
+  const id = generateRandomString();
+  urlDatabase[id] = { 
+    longURL: req.body.longURL,
+    userID: user_id 
+  };
+  
   res.redirect('/urls');
 });
 
 //handling request the edit page (url_show)
 app.get("/urls/:id", (req, res) => {
- 
+  const id = req.params.id;
+  const user_id = req.cookies.user_id
+
+  if(!user_id) {
+   res.send("<h4> You haven't sign in yet. please sign in first!</h4> <br> <a href = '/login'> sign in </a>")
+   return;
+  }
+  if(!urlDatabase[id]) {
+    res.send('<h5>URL does not exist!</h5>')
+    return
+  }
   const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    id: id,
+    longURL: urlDatabase[req.params.id].longURL,
     user: users[req.cookies.user_id],
   };
   res.render("urls_show", templateVars);
@@ -91,12 +136,12 @@ app.get("/urls/:id", (req, res) => {
 
 //route for redirecting shortURL to its own website/realURL
 app.get("/u/:id", (req, res) => {
-  if (!urlDatabase[req.params.id]) {
+  if (!urlDatabase[req.params.id].longURL) {
     res.send('<h2>The short URL is not exist </h2>');
     return;
   }
 
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
     
 });
@@ -105,15 +150,50 @@ app.get("/u/:id", (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const updatedURL = req.body.url;
   const id = req.params.id;
-  urlDatabase[id] = updatedURL;
+  const user_id = req.cookies.user_id
+  if(!user_id) {
+  res.send('<h5>you cannot update before you sign in!</h5>')
+  return;
+  }
+
+  if(!urlDatabase[id]) {
+    res.send('<h5>URL does not exist!</h5>')
+    return
+  }
+  if(urlDatabase[id].userID === user_id) {
+    urlDatabase[id].longURL = updatedURL;
+    res.redirect('/urls');
+    return;
+  }
+
+
+  res.send('<h5>it is not your own URL!</h5>')
   
-  res.redirect('/urls');
 });
 
 //rout handling for deleting an specific url
 app.post('/urls/:id/delete', (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect('/urls');
+  const id = req.params.id;
+  const user_id = req.cookies.user_id
+
+  if(!user_id) {
+    res.send('<h5>you cannot update before you sign in!</h5>')
+    return;
+  }
+
+  if(!urlDatabase[id]) {
+    res.send('<h5>URL does not exist!</h5>')
+    return
+  }
+
+  if(urlDatabase[id].userID === user_id) {
+    delete urlDatabase[id] ;
+    res.redirect('/urls');
+    return;
+  }
+
+  res.send('<h5>seems you don\'t own that URL!</h5>')
+
 });
 
 
@@ -127,7 +207,6 @@ app.post('/logout', (req, res) => {
 
 app.get('/register', (req, res) => {
   const user_id = req.cookies.user_id
-  console.log(user_id);
   if(user_id) {
     res.redirect('/urls')
     return;
