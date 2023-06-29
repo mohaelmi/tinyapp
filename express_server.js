@@ -1,6 +1,8 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 3000; // port number
+const SALT_ROUNDS = 10
 
 
 //set up middle ware
@@ -23,7 +25,7 @@ const urlDatabase = {
 };
 
 const users = {
-  dt1tg: { id: 'dt1tg', email: 'moha@12', password: '1' },
+  dt1tg: { id: 'dt1tg', email: 'moha@12', password: '$2a$10$DmM13XDXPsYDz7gkZaII..3tyhPUX7crzC.D.PT8Vw6ogrphObydO' },
   d2ateg: { id: 'd2ateg', email: 'moha@1', password: '2' }
 }
 
@@ -251,8 +253,8 @@ app.post('/login', (req, res) => {
     res.status(403).send('user does not exist or incorrect email')
     return;
   }
-
-  if(user.password !== password) {
+  const isMatch = bcrypt.compareSync(password, user.password); 
+  if(!isMatch) {
     res.status(403).send('Incorrect password')
     return;
   }
@@ -276,15 +278,19 @@ app.post('/register', (req, res) => {
     res.status(400).send('email already exists')
     return;
   }
+
+  const salt = bcrypt.genSaltSync(SALT_ROUNDS)
+  const hashsedPassword = bcrypt.hashSync(password, salt);
    
   const user = { 
     id: generateRandomString(),
     email,
-    password 
+    password: hashsedPassword 
   }
-    users[user.id] = user
-    res.cookie('user_id', user.id);
-    res.redirect('/urls')
+  console.log(user);
+  users[user.id] = user
+  res.cookie('user_id', user.id);
+  res.redirect('/urls')
   
 })
 
