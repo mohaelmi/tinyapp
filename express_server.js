@@ -1,13 +1,16 @@
 const express = require("express");
-const uid = require("uid");
-const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 3000; // port number
 
+
+//set up middle ware
 app.set("view engine", "ejs");
-app.use(express.urlencoded({ extended: true }));
+const cookieParser = require("cookie-parser");
+app.use(express.urlencoded({ extended: false })); // to be able to use req.body
 app.use(cookieParser());
 
+
+//databases
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
@@ -19,16 +22,16 @@ const urlDatabase = {
   }
 };
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
 const users = {
   dt1tg: { id: 'dt1tg', email: 'moha@12', password: '1' },
   d2ateg: { id: 'd2ateg', email: 'moha@1', password: '2' }
 }
 
+//////////////////////
+//helper functions starts here
+//////////////////////
+
+//func generate random string for urls and users
 const generateRandomString = () => {
   let shortUrl = '';
   let str = 'gsD5d37g1t';
@@ -38,6 +41,7 @@ const generateRandomString = () => {
   return shortUrl;
 };
 
+//find urls related for an specific user 
 const urlsForUser = (id) => {
   const urls = {}
   for (const urlId in urlDatabase) {
@@ -49,10 +53,7 @@ const urlsForUser = (id) => {
    return urls? urls : null
 }
 
-app.get('/', (req, res) => {
-  res.redirect('/urls')
-})
-
+//find a user by their email
 const getUserByEmail = (email) => {
   let user;
   for (const userId in users) {
@@ -68,7 +69,19 @@ const getUserByEmail = (email) => {
   return null
 }
 
-//route for showing urls_index page
+
+///////////////////////////////
+///routes start from here
+////////////////////////////////
+
+
+// GET / to redirect /urls
+app.get('/', (req, res) => {
+  res.redirect('/urls')
+})
+
+
+//GET /urls route for showing urls_index page
 app.get("/urls", (req, res) => {
   const user_id = req.cookies.user_id
   if(!user_id) {
@@ -86,7 +99,7 @@ app.get("/urls", (req, res) => {
   res.render('urls_index', templateVars);
 });
 
-//route for handling for rendering urls_new page
+//GET /urls/new route for rendering urls_new page
 app.get("/urls/new", (req, res) => {
   const user_id = req.cookies.user_id
   if(!user_id) {
@@ -97,7 +110,7 @@ app.get("/urls/new", (req, res) => {
   res.render('urls_new', templateVars);
 });
 
-//route for handling new URL and shortenning
+//POST /urls/new route for handling new URL and shortenning using form
 app.post("/urls/new", (req, res) => {
   const user_id = req.cookies.user_id
   if(!user_id) {
@@ -113,7 +126,8 @@ app.post("/urls/new", (req, res) => {
   res.redirect('/urls');
 });
 
-//handling request the edit page (url_show)
+
+//GET /urls/:id for request the edit page (url_show)
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const user_id = req.cookies.user_id
@@ -134,7 +148,7 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-//route for redirecting shortURL to its own website/realURL
+//GET /u/:id route for redirecting shortURL to its own website/realURL
 app.get("/u/:id", (req, res) => {
   if (!urlDatabase[req.params.id].longURL) {
     res.send('<h2>The short URL is not exist </h2>');
@@ -146,7 +160,7 @@ app.get("/u/:id", (req, res) => {
     
 });
 
-//route updates url
+//POST /urls/:id route for updating specific url through form
 app.post('/urls/:id', (req, res) => {
   const updatedURL = req.body.url;
   const id = req.params.id;
@@ -171,7 +185,7 @@ app.post('/urls/:id', (req, res) => {
   
 });
 
-//rout handling for deleting an specific url
+//POST /urls/:id/delete rout for deleting an specific url through forms
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
   const user_id = req.cookies.user_id
@@ -198,13 +212,14 @@ app.post('/urls/:id/delete', (req, res) => {
 
 
 
-//clear the cookie and redirect when request post at /logout
+//POST /logout to clear the cookie and redirect
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect('/login');
 });
 
 
+//GET /register to render registration form
 app.get('/register', (req, res) => {
   const user_id = req.cookies.user_id
   if(user_id) {
@@ -215,6 +230,7 @@ app.get('/register', (req, res) => {
   res.render('registration')
 })
 
+// GET login to render login form
 app.get('/login', (req, res) => {
   const user_id = req.cookies.user_id
   if(user_id) {
@@ -225,7 +241,7 @@ app.get('/login', (req, res) => {
 })
 
 
-//login
+//POST /login to send login info to the database
 app.post('/login', (req, res) => {
   const email = req.body.email
   const password = req.body.password
@@ -245,6 +261,8 @@ app.post('/login', (req, res) => {
   res.redirect('/urls');
 });
 
+
+//POST /register to send new user info to the database
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password
