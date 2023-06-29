@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
+const { generateRandomString, urlsForUser, getUserByEmail } = require('./helpers')
 const app = express();
 const PORT = 3000; // port number
 const SALT_ROUNDS = 10
@@ -36,43 +37,6 @@ const users = {
 //helper functions starts here
 /////////////////////////////////
 
-//func generate random string for urls and users
-const generateRandomString = () => {
-  let shortUrl = '';
-  let str = 'gsD5d37g1t';
-  for (let i = 6; i > 0; i--) {
-    shortUrl  += str[Math.floor(Math.random() * str.length)];
-  }
-  return shortUrl;
-};
-
-//find urls related for an specific user 
-const urlsForUser = (id) => {
-  const urls = {}
-  for (const urlId in urlDatabase) {
-    if(urlDatabase[urlId].userID === id) {
-      urls[urlId]  = urlDatabase[urlId].longURL
-    }
-   }
-
-   return urls? urls : null
-}
-
-//find a user by their email
-const getUserByEmail = (email) => {
-  let user;
-  for (const userId in users) {
-    if(users[userId].email === email){
-      user = users[userId]
-    }
-  }
-
-  if(user) {
-    return user
-  }
-
-  return null
-}
 
 
 ///////////////////////////////
@@ -94,7 +58,7 @@ app.get("/urls", (req, res) => {
     return;
   }
 
-  const urls =  urlsForUser(user_id)
+  const urls =  urlsForUser(user_id, urlDatabase)
  
   
   const templateVars = {
@@ -250,7 +214,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email
   const password = req.body.password
-  const user = getUserByEmail(email)
+  const user = getUserByEmail(email, users)
 
    if(!user) {
     res.status(403).send('user does not exist or incorrect email')
@@ -271,7 +235,7 @@ app.post('/login', (req, res) => {
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password
-  const userExists = getUserByEmail(email)
+  const userExists = getUserByEmail(email, users)
   if(!email || !password) {
     res.status(400).send('please provide full information!')
     return;
@@ -290,7 +254,7 @@ app.post('/register', (req, res) => {
     email,
     password: hashsedPassword 
   }
-  console.log(user);
+ 
   users[user.id] = user
   req.session.user_id = user.id
   res.redirect('/urls')
