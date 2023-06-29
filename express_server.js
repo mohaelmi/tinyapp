@@ -1,4 +1,5 @@
 const express = require("express");
+const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 3000; // port number
@@ -7,9 +8,11 @@ const SALT_ROUNDS = 10
 
 //set up middle ware
 app.set("view engine", "ejs");
-const cookieParser = require("cookie-parser");
 app.use(express.urlencoded({ extended: false })); // to be able to use req.body
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'userSession',
+  keys: ['secret-password'],
+}))
 
 
 //databases
@@ -25,13 +28,13 @@ const urlDatabase = {
 };
 
 const users = {
-  dt1tg: { id: 'dt1tg', email: 'moha@12', password: '$2a$10$DmM13XDXPsYDz7gkZaII..3tyhPUX7crzC.D.PT8Vw6ogrphObydO' },
+  dt1tg: { id: 'dt1tg', email: 'moha@12', password: '$2a$10$dRqwPuCdJ/haE.TM/6e5..Cyv8tf9U9.L8oGRBKZRQyHcIE6S8Qra' },
   d2ateg: { id: 'd2ateg', email: 'moha@1', password: '2' }
 }
 
-//////////////////////
+///////////////////////////////
 //helper functions starts here
-//////////////////////
+/////////////////////////////////
 
 //func generate random string for urls and users
 const generateRandomString = () => {
@@ -85,7 +88,7 @@ app.get('/', (req, res) => {
 
 //GET /urls route for showing urls_index page
 app.get("/urls", (req, res) => {
-  const user_id = req.cookies.user_id
+  const user_id = req.session.user_id
   if(!user_id) {
     res.send("<h4> You haven't sign in yet. please login first!</h4> <br> <a href = '/login'> sign in </a>")
     return;
@@ -96,14 +99,14 @@ app.get("/urls", (req, res) => {
   
   const templateVars = {
     urls: urls,
-    user: users[req.cookies.user_id],
+    user: users[user_id],
   };
   res.render('urls_index', templateVars);
 });
 
 //GET /urls/new route for rendering urls_new page
 app.get("/urls/new", (req, res) => {
-  const user_id = req.cookies.user_id
+  const user_id = req.session.user_id
   if(!user_id) {
     res.redirect('/login')
     return;
@@ -114,7 +117,7 @@ app.get("/urls/new", (req, res) => {
 
 //POST /urls/new route for handling new URL and shortenning using form
 app.post("/urls/new", (req, res) => {
-  const user_id = req.cookies.user_id
+  const user_id = req.session.user_id
   if(!user_id) {
    res.send("<h4> You haven't sign in yet. please sign in first!</h4> <br> <a href = '/login'> sign in </a>")
    return;
@@ -132,7 +135,7 @@ app.post("/urls/new", (req, res) => {
 //GET /urls/:id for request the edit page (url_show)
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
-  const user_id = req.cookies.user_id
+  const user_id = req.session.user_id
 
   if(!user_id) {
    res.send("<h4> You haven't sign in yet. please sign in first!</h4> <br> <a href = '/login'> sign in </a>")
@@ -145,7 +148,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: id,
     longURL: urlDatabase[req.params.id].longURL,
-    user: users[req.cookies.user_id],
+    user: users[req.session.user_id],
   };
   res.render("urls_show", templateVars);
 });
@@ -166,7 +169,7 @@ app.get("/u/:id", (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const updatedURL = req.body.url;
   const id = req.params.id;
-  const user_id = req.cookies.user_id
+  const user_id = req.session.user_id
   if(!user_id) {
   res.send('<h5>you cannot update before you sign in!</h5>')
   return;
@@ -190,7 +193,7 @@ app.post('/urls/:id', (req, res) => {
 //POST /urls/:id/delete rout for deleting an specific url through forms
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
-  const user_id = req.cookies.user_id
+  const user_id = req.session.user_id
 
   if(!user_id) {
     res.send('<h5>you cannot update before you sign in!</h5>')
@@ -216,14 +219,14 @@ app.post('/urls/:id/delete', (req, res) => {
 
 //POST /logout to clear the cookie and redirect
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null
   res.redirect('/login');
 });
 
 
 //GET /register to render registration form
 app.get('/register', (req, res) => {
-  const user_id = req.cookies.user_id
+  const user_id = req.session.user_id
   if(user_id) {
     res.redirect('/urls')
     return;
@@ -234,7 +237,7 @@ app.get('/register', (req, res) => {
 
 // GET login to render login form
 app.get('/login', (req, res) => {
-  const user_id = req.cookies.user_id
+  const user_id = req.session.user_id
   if(user_id) {
     res.redirect('/urls')
     return;
@@ -259,7 +262,7 @@ app.post('/login', (req, res) => {
     return;
   }
 
-  res.cookie('user_id', user.id);
+  req.session.user_id = user.id
   res.redirect('/urls');
 });
 
@@ -289,7 +292,7 @@ app.post('/register', (req, res) => {
   }
   console.log(user);
   users[user.id] = user
-  res.cookie('user_id', user.id);
+  req.session.user_id = user.id
   res.redirect('/urls')
   
 })
