@@ -8,37 +8,37 @@ const generateRandomString = () => {
   return shortUrl;
 };
 
-//find urls related for an specific user 
+//find urls related for an specific user
 const urlsForUser = (id, urlDatabase) => {
-  const urls = {}
+  const urls = {};
   for (const urlId in urlDatabase) {
-    if(urlDatabase[urlId].userID === id) {
-      urls[urlId]  = urlDatabase[urlId].longURL
+    if (urlDatabase[urlId].userID === id) {
+      urls[urlId]  = urlDatabase[urlId].longURL;
     }
-   }
+  }
 
-   return urls? urls : null
-}
+  return urls ? urls : null;
+};
 
 //find a user by their email
 const getUserByEmail = (email, usersData) => {
   let user;
   for (const userId in usersData) {
-    if(usersData[userId].email === email){
-      user = usersData[userId]
+    if (usersData[userId].email === email) {
+      user = usersData[userId];
     }
   }
 
-  if(user) {
-    return user
+  if (user) {
+    return user;
   }
 
-  return null
-}
+  return null;
+};
 
 
 module.exports = {
   generateRandomString,
   urlsForUser,
   getUserByEmail
-}
+};
