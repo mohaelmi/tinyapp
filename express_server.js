@@ -33,12 +33,12 @@ const urlDatabase = {
 const users = {
   dt1tg: {
     id: 'dt1tg',
-    email: 'moha@12',
+    email: 'moha@gmail.com',
     password: '$2a$10$dRqwPuCdJ/haE.TM/6e5..Cyv8tf9U9.L8oGRBKZRQyHcIE6S8Qra' // 1
   },
   d2ateg: {
     id: 'd2ateg',
-    email: 'moha@1',
+    email: 'mike@gmail.com',
     password: '$2a$10$5iPNqRo6l6cFzpQ3VRt5bePRmwzJCLdEO2K/I9T1RtZA/GnWHgIna' // 2
   }
 };
