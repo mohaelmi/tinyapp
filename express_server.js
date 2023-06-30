@@ -29,14 +29,17 @@ const urlDatabase = {
 };
 
 const users = {
-  dt1tg: { id: 'dt1tg', email: 'moha@12', password: '$2a$10$dRqwPuCdJ/haE.TM/6e5..Cyv8tf9U9.L8oGRBKZRQyHcIE6S8Qra' },
-  d2ateg: { id: 'd2ateg', email: 'moha@1', password: '2' }
+  dt1tg: { 
+    id: 'dt1tg', 
+    email: 'moha@12', 
+    password: '$2a$10$dRqwPuCdJ/haE.TM/6e5..Cyv8tf9U9.L8oGRBKZRQyHcIE6S8Qra' 
+  },
+  d2ateg: { 
+    id: 'd2ateg', 
+    email: 'moha@1', 
+    password: '2' 
+  }
 }
-
-///////////////////////////////
-//helper functions starts here
-/////////////////////////////////
-
 
 
 ///////////////////////////////

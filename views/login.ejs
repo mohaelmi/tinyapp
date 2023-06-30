@@ -19,26 +19,34 @@
   </head>
 
   <body>
-    <main style="margin: 6em">
-
-    <h3>Log in</h3>
-     
-    <p>want to sign up first  <a href="/register">click here</a></p><br> 
-    <form class="form-inline" action="/login" method="POST">
-      <div class="form-group" >
-        <label for="email">Enter Email:</label>
-        <input class="form-control" type="email" name="email" placeholder="Email"
-          style="width: 200px; margin: 1em"
-        /><br>
-        <label for="password">Enter Password:</label>
-        <input class="form-control" type="password" name="password" placeholder="Password"
-          style="width: 200px; margin: 1em"
-        />
-        <button type="submit" class="btn btn-outline-info">Login</button>
-            
+    <div id="login">
+      <h3 class="text-center text-white pt-5">Login form</h3>
+      <div class="container">
+          <div id="login-row" class="row justify-content-center align-items-center">
+              <div id="login-column" class="col-md-6">
+                  <div id="login-box" class="col-md-12">
+                      <form  class="form" action="/login" method="POST">
+                          <h3 class="text-center text-info">Login</h3>
+                          <div class="form-group">
+                              <label for="email" class="text-info">Email:</label><br>
+                              <input type="email" name="email" class="form-control">
+                          </div>
+                          <div class="form-group">
+                              <label for="password" class="text-info">Password:</label><br>
+                              <input type="password" name="password" class="form-control">
+                          </div>
+                          <div class="form-group">
+                              <input type="submit" class="btn btn-info btn-md" value="submit">
+                          </div>
+                          <div id="register-link" class="text-right">
+                              <a href="/register" class="text-info">Register here</a>
+                          </div>
+                      </form>
+                  </div>
+              </div>
+          </div>
       </div>
-    </form>
-    </main>
+  </div>
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -59,4 +67,25 @@
 </html>
 
 
+<!-- 
 
+<main style="margin: 6em">
+
+  <h3>Log in</h3>
+   
+  <h6>want to sign up first  <a href="/register">click here</a></h6><br> 
+  <form class="form-inline" action="/login" method="POST">
+    <div class="form-group" >
+      <label for="email">Enter Email:</label>
+      <input class="form-control" type="email" name="email" placeholder="Email"
+        style="width: 200px; margin: 1em"
+      /><br>
+      <label for="password">Enter Password:</label>
+      <input class="form-control" type="password" name="password" placeholder="Password"
+        style="width: 200px; margin: 1em"
+      />
+      <button type="submit" class="btn btn-outline-info">Login</button>
+          
+    </div>
+  </form>
+  </main> -->
