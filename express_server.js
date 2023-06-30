@@ -1,4 +1,5 @@
 const express = require("express");
+var methodOverride = require('method-override')
 const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 const { generateRandomString, urlsForUser, getUserByEmail } = require('./helpers')
@@ -14,6 +15,7 @@ app.use(cookieSession({
   name: 'userSession',
   keys: ['secret-password'],
 }))
+app.use(methodOverride('_method'))
 
 
 //databases
@@ -32,12 +34,12 @@ const users = {
   dt1tg: { 
     id: 'dt1tg', 
     email: 'moha@12', 
-    password: '$2a$10$dRqwPuCdJ/haE.TM/6e5..Cyv8tf9U9.L8oGRBKZRQyHcIE6S8Qra' 
+    password: '$2a$10$dRqwPuCdJ/haE.TM/6e5..Cyv8tf9U9.L8oGRBKZRQyHcIE6S8Qra' // 1
   },
   d2ateg: { 
     id: 'd2ateg', 
     email: 'moha@1', 
-    password: '2' 
+    password: '$2a$10$5iPNqRo6l6cFzpQ3VRt5bePRmwzJCLdEO2K/I9T1RtZA/GnWHgIna' // 2 
   }
 }
 
@@ -133,7 +135,7 @@ app.get("/u/:id", (req, res) => {
 });
 
 //POST /urls/:id route for updating specific url through form
-app.post('/urls/:id', (req, res) => {
+app.put('/urls/:id', (req, res) => {
   const updatedURL = req.body.url;
   const id = req.params.id;
   const user_id = req.session.user_id
@@ -158,7 +160,7 @@ app.post('/urls/:id', (req, res) => {
 });
 
 //POST /urls/:id/delete rout for deleting an specific url through forms
-app.post('/urls/:id/delete', (req, res) => {
+app.delete('/urls/:id', (req, res) => {
   const id = req.params.id;
   const user_id = req.session.user_id
 
@@ -257,7 +259,7 @@ app.post('/register', (req, res) => {
     email,
     password: hashsedPassword 
   }
- 
+  console.log(user);
   users[user.id] = user
   req.session.user_id = user.id
   res.redirect('/urls')
