@@ -1,14 +1,15 @@
 # Tinyapp for shortening URL
 
-## Quick start and things you need before yoy run the app
+## Quick start and things you need before run the app
   - npm modules
   - bcryptjs
   - cookie-session
 
-### a website that shortens a given URL, also, website provides CRUD functionality.
-### you can see URLs that you have created, add new URL, delete and update.
+### the website shortens a given URL as well as provides CRUD functionality.
+### you can display URLs that you have created, add new URL, delete and update.
 
-### a website has also authorization funcationality. you must be sign in first to add URL then you can only access your related data/URLs once you sign in.
+### the website has also authorization funcationality. you must be sign in first to access your related data/URLs.
+### you also have authority to manipulate your related data once you sign in.
 
 ## Final Product
 
