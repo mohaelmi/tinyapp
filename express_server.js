@@ -63,9 +63,9 @@ app.get("/urls", (req, res) => {
     return;
   }
 
-  const urls =  urlsForUser(user_id, urlDatabase);
- 
-  
+  const urls = urlsForUser(user_id, urlDatabase);
+
+
   const templateVars = {
     urls: urls,
     user: users[user_id],
@@ -80,24 +80,29 @@ app.get("/urls/new", (req, res) => {
     res.redirect('/login');
     return;
   }
-  const templateVars = {   user: users[user_id] };
+  const templateVars = { user: users[user_id] };
   res.render('urls_new', templateVars);
 });
 
 //POST /urls/new route for handling new URL and shortenning using form
-app.post("/urls/new", (req, res) => {
+app.post("/urls", (req, res) => {
   const user_id = req.session.user_id;
+  const URL = req.body.longURL;
   if (!user_id) {
     res.send("<h4> You haven't sign in yet. please sign in first!</h4> <br> <a href = '/login'> sign in </a>");
     return;
   }
+  if (!URL) {
+    res.send("<h4> URL is empty! </h4>");
+    return;
+  }
   const id = generateRandomString();
   urlDatabase[id] = {
-    longURL: req.body.longURL,
+    longURL: URL,
     userID: user_id
   };
-  
-  res.redirect('/urls');
+
+  res.redirect(`/urls/${id}`);
 });
 
 
@@ -114,6 +119,10 @@ app.get("/urls/:id", (req, res) => {
     res.send('<h5>URL does not exist!</h5>');
     return;
   }
+  if (urlDatabase[id].userID !== user_id) {
+    res.send('<h5>you do not own this URL!</h5>');
+    return;
+  }
   const templateVars = {
     id: id,
     longURL: urlDatabase[req.params.id].longURL,
@@ -124,14 +133,15 @@ app.get("/urls/:id", (req, res) => {
 
 //GET /u/:id route for redirecting shortURL to its own website/realURL
 app.get("/u/:id", (req, res) => {
-  if (!urlDatabase[req.params.id].longURL) {
-    res.send('<h2>The short URL is not exist </h2>');
+  const id = req.params.id;
+  if (!urlDatabase[id]) {
+    res.send('<h2>The corresponding URL for this short id does not exist </h2>');
     return;
   }
 
   const longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
-    
+
 });
 
 //POST /urls/:id route for updating specific url through form
@@ -156,7 +166,7 @@ app.put('/urls/:id', (req, res) => {
 
 
   res.send('<h5>it is not your own URL!</h5>');
-  
+
 });
 
 //POST /urls/:id/delete rout for deleting an specific url through forms
@@ -200,8 +210,8 @@ app.get('/register', (req, res) => {
     res.redirect('/urls');
     return;
   }
-
-  res.render('registration');
+  const user = { user: users[user_id] };
+  res.render('registration', user);
 });
 
 // GET login to render login form
@@ -211,7 +221,8 @@ app.get('/login', (req, res) => {
     res.redirect('/urls');
     return;
   }
-  res.render('login');
+  const user = { user: users[user_id] };
+  res.render('login', user);
 });
 
 
@@ -245,7 +256,7 @@ app.post('/register', (req, res) => {
     res.status(400).send('please provide full information!');
     return;
   }
-  
+
   if (userExists) {
     res.status(400).send('email already exists');
     return;
@@ -253,7 +264,7 @@ app.post('/register', (req, res) => {
 
   const salt = bcrypt.genSaltSync(SALT_ROUNDS);
   const hashsedPassword = bcrypt.hashSync(password, salt);
-   
+
   const user = {
     id: generateRandomString(),
     email,
@@ -263,7 +274,7 @@ app.post('/register', (req, res) => {
   users[user.id] = user;
   req.session.user_id = user.id;
   res.redirect('/urls');
-  
+
 });
 
 
